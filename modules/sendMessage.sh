@@ -202,8 +202,14 @@ _button_row() {
 	do
 		[ -z "${arg}" ] && sep="],[" && continue
 		type="callback_data"
-		[[ "${arg##*|}" =~ ^(https*://|tg://) ]] && type="url"
-		json+="${sep}"'{"text":"'"$(JsonEscape "${arg%|*}")"'", "'"${type}"'":"'"${arg##*|}"'"}'
+		if [[ "${arg##*|}" =~ ^(https*://|tg://) ]]; then
+			type="url"
+			json+="${sep}"'{"text":"'"$(JsonEscape "${arg%|*}")"'", "'"${type}"'":"'"${arg##*|}"'"}'
+		elif [[ "${arg##*|}" =~ ^(webapp:) ]]; then
+			json+="${sep}"'{"text":"'"$(JsonEscape "${arg%|*}")"'", "'"web_app"'":{"url":"'"${arg##*|webapp:}"'"}}'
+		else
+			json+="${sep}"'{"text":"'"$(JsonEscape "${arg%|*}")"'", "'"${type}"'":"'"${arg##*|}"'"}'
+		fi
 		sep=","
 	done
 	printf "[%s]" "${json}"
